@@ -2,21 +2,40 @@
 
 namespace App\Infrastructure\Controller;
 
+use Elasticsearch\ClientBuilder;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class AddCommentController
 {
+    const COMMENTS_INDEX = 'comments';
+
+    /**
+     * @param LoggerInterface $logger
+     *
+     * @return Response
+     */
     public function __invoke(LoggerInterface $logger)
     {
-        echo 'hello Iker';
-        $logger->info('I just got the logger !!!!!!!');
-        $logger->info('I just got the logger !!!!!!!');
         $request = Request::createFromGlobals();
-        $logger->info($request->getContent());
-        $logger->info($request->getBaseUrl());
+        try {
+            $client = ClientBuilder::create()->setHosts(['elasticsearch:9200'])->build();
+            if (!$client->indices()->exists(['index' => self::COMMENTS_INDEX])) {
+                $client->indices()->create(['index' => self::COMMENTS_INDEX]);
+            }
 
-        return new Response('hiiiii');
+            $client->index(
+                [
+                    'index' => self::COMMENTS_INDEX,
+                    'type' => 'comment',
+                    'body' => $request->getContent()
+                ]
+            );
+
+        } catch (\Exception $exception) {
+            return new Response($exception->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+        return new Response();
     }
 }
