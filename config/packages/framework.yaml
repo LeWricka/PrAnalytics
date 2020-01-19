@@ -14,3 +14,5 @@ framework:
     #fragments: true
     php_errors:
         log: true
+parameters:
+        elasticsearch_url: '%env(ELASTICSEARCH_URL)%'
