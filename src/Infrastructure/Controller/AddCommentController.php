@@ -2,40 +2,39 @@
 
 namespace App\Infrastructure\Controller;
 
-use Elasticsearch\ClientBuilder;
+use App\Application\Services\AddPRComment\AddPRCommentService;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class AddCommentController
 {
-    const COMMENTS_INDEX = 'comments';
-
     /**
-     * @param LoggerInterface $logger
+     * @param LoggerInterface     $logger
+     *
+     * @param AddPRCommentService $addPRCommentService
      *
      * @return Response
      */
-    public function __invoke(LoggerInterface $logger)
+    public function __invoke(LoggerInterface $logger, AddPRCommentService $addPRCommentService)
     {
         $request = Request::createFromGlobals();
-        try {
-            $client = ClientBuilder::create()->setHosts(['elasticsearch:9200'])->build();
-            if (!$client->indices()->exists(['index' => self::COMMENTS_INDEX])) {
-                $client->indices()->create(['index' => self::COMMENTS_INDEX]);
-            }
+        $addPRCommentService->execute($request->getContent(), $this->transformAction($request));
 
-            $client->index(
-                [
-                    'index' => self::COMMENTS_INDEX,
-                    'type' => 'comment',
-                    'body' => $request->getContent()
-                ]
-            );
-
-        } catch (\Exception $exception) {
-            return new Response($exception->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
         return new Response();
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return array
+     */
+    private function transformAction(Request $request): array
+    {
+        $parametersAsArray = [];
+        if ($content = $request->getContent()) {
+            $parametersAsArray = json_decode($content, true);
+        }
+        return $parametersAsArray;
     }
 }
