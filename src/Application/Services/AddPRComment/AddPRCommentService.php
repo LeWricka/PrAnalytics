@@ -5,6 +5,8 @@ namespace App\Application\Services\AddPRComment;
 use App\Domain\PRComment\PRComment;
 use App\Domain\PRComment\PRCommentRepository;
 use App\Domain\PRComment\PRCommentType;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class AddPRCommentService
 {
@@ -27,8 +29,13 @@ class AddPRCommentService
      */
     public function execute(string $commentData, array $requestFormattedData)
     {
-        $prCommentType = PRCommentType::build($requestFormattedData['comment']['body']);
+        if (!isset($requestFormattedData['comment']['body']) || !isset($requestFormattedData['repository']['full_name'])) {
+            throw new HttpException(Response::HTTP_BAD_REQUEST, 'Invalid given data');
+        }
+        $prCommentType = PRCommentType::buildFromData($requestFormattedData['comment']['body']);
+        $originRepository = strtolower(str_replace('/', '-', $requestFormattedData['repository']['full_name']));
         $prComment = new PRComment($prCommentType, $commentData);
-        $this->prCommentRepository->save($prComment);
+
+        $this->prCommentRepository->save($prComment, $originRepository);
     }
 }

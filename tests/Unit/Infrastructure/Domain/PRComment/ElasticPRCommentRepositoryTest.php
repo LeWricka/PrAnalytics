@@ -37,18 +37,18 @@ class ElasticPRCommentRepositoryTest extends TestCase
      */
     public function saves_pr_comment()
     {
-        $prComment = PRCommentTestDataBuilder::aPRComment(PRCommentType::buildTesting(), '{"content"}')->build();
+        $prComment = PRCommentTestDataBuilder::aPRComment(PRCommentType::buildGeneric(), '{"content"}')->build();
         $expectedIndexParameters = [
-            'index' => ElasticPRCommentRepository::COMMENTS_INDEX,
-            'type' => 'comment',
-            'body' => '{"type":"Testing","content"}'
+            'index' => 'repo-name-'.ElasticPRCommentRepository::COMMENTS_INDEX,
+            'type' => ElasticPRCommentRepository::COMMENT_TYPE,
+            'body' => '{"type":"generic","content"}'
         ];
 
-        $this->elasticClient->exists(ElasticPRCommentRepository::COMMENTS_INDEX)->willReturn(true);
+        $this->elasticClient->exists('repo-name-'.ElasticPRCommentRepository::COMMENTS_INDEX)->willReturn(true);
         $this->elasticClient->create(Argument::any())->shouldNotBeCalled();
         $this->elasticClient->index($expectedIndexParameters)->willReturn([]);
 
-        $this->elasticPRCommentRepository->save($prComment);
+        $this->elasticPRCommentRepository->save($prComment, 'repo-name');
     }
 
     /**
@@ -56,17 +56,17 @@ class ElasticPRCommentRepositoryTest extends TestCase
      */
     public function creates_index_and_saves_pr_comment()
     {
-        $prComment = PRCommentTestDataBuilder::aPRComment(PRCommentType::buildTesting(), '{"content"}')->build();
+        $prComment = PRCommentTestDataBuilder::aPRComment(PRCommentType::buildGeneric(), '{"content"}')->build();
         $expectedIndexParameters = [
-            'index' => ElasticPRCommentRepository::COMMENTS_INDEX,
-            'type' => 'comment',
-            'body' => '{"type":"Testing","content"}'
+            'index' => 'repo-name-'.ElasticPRCommentRepository::COMMENTS_INDEX,
+            'type' => ElasticPRCommentRepository::COMMENT_TYPE,
+            'body' => '{"type":"generic","content"}'
         ];
 
-        $this->elasticClient->exists(ElasticPRCommentRepository::COMMENTS_INDEX)->willReturn(false);
-        $this->elasticClient->create(ElasticPRCommentRepository::COMMENTS_INDEX)->shouldBeCalled();
+        $this->elasticClient->exists('repo-name-'.ElasticPRCommentRepository::COMMENTS_INDEX)->willReturn(false);
+        $this->elasticClient->create('repo-name-'.ElasticPRCommentRepository::COMMENTS_INDEX)->shouldBeCalled();
         $this->elasticClient->index($expectedIndexParameters)->willReturn([]);
 
-        $this->elasticPRCommentRepository->save($prComment);
+        $this->elasticPRCommentRepository->save($prComment, 'repo-name');
     }
 }
