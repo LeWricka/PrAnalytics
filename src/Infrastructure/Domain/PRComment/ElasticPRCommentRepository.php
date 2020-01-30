@@ -9,6 +9,7 @@ use App\Infrastructure\Domain\ElasticClient;
 class ElasticPRCommentRepository implements PRCommentRepository
 {
     const COMMENTS_INDEX = 'comments';
+    const COMMENT_TYPE = 'comment';
 
     /**
      * @var ElasticClient
@@ -25,19 +26,18 @@ class ElasticPRCommentRepository implements PRCommentRepository
 
     /**
      * @param PRComment $prComment
-     *
-     * @return void
+     * @param string    $originRepository
      */
-    public function save(PRComment $prComment)
+    public function save(PRComment $prComment, string $originRepository)
     {
-        if (!$this->elasticClient->exists(self::COMMENTS_INDEX)) {
-            $this->elasticClient->create(self::COMMENTS_INDEX);
+        if (!$this->elasticClient->exists($originRepository.'-'.self::COMMENTS_INDEX)) {
+            $this->elasticClient->create($originRepository.'-'.self::COMMENTS_INDEX);
         }
 
         $this->elasticClient->index(
             [
-                'index' => self::COMMENTS_INDEX,
-                'type' => 'comment',
+                'index' => $originRepository.'-'.self::COMMENTS_INDEX,
+                'type' => self::COMMENT_TYPE,
                 'body' => substr_replace(
                     $prComment->getContent(),
                     '"type":"'.$prComment->getPrCommentType()->getValue().'",',

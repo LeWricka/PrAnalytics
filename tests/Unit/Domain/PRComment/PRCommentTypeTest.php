@@ -12,9 +12,9 @@ class PRCommentTypeTest extends TestCase
      */
     public function adds_testing_type_comment()
     {
-        $commentType = PRCommentType::build('[tes');
+        $commentType = PRCommentType::buildFromData('[testing]');
 
-        $this->assertEquals(PRCommentType::TESTING, $commentType->getValue());
+        $this->assertEquals('testing', $commentType->getValue());
     }
 
     /**
@@ -22,19 +22,18 @@ class PRCommentTypeTest extends TestCase
      */
     public function adds_testing_type_comment_having_capital_letters()
     {
-        $commentType = PRCommentType::build('[Tes');
+        $commentType = PRCommentType::buildFromData('[Testing]');
 
-        $this->assertEquals(PRCommentType::TESTING, $commentType->getValue());
+        $this->assertEquals('testing', $commentType->getValue());
     }
-
 
     /**
      * @test
      */
     public function adds_other_type_comment()
     {
-        $commentType = PRCommentType::build('[tis');
+        $commentType = PRCommentType::buildFromData('[tis');
 
-        $this->assertEquals(PRCommentType::OTHER, $commentType->getValue());
+        $this->assertEquals(PRCommentType::GENERIC, $commentType->getValue());
     }
 }
