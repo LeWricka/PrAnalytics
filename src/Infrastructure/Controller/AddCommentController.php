@@ -21,7 +21,7 @@ class AddCommentController
         $request = Request::createFromGlobals();
         $addPRCommentService->execute($request->getContent(), $this->transformAction($request));
 
-        return new Response();
+        return new Response($request->getContent());
     }
 
     /**
@@ -32,8 +32,8 @@ class AddCommentController
     private function transformAction(Request $request): array
     {
         $parametersAsArray = [];
-        if ($content = $request->getContent()) {
-            $parametersAsArray = json_decode($content, true);
+        if ($request->getContent()) {
+            $parametersAsArray = json_decode($request->getContent(), true);
         }
         return $parametersAsArray;
     }
