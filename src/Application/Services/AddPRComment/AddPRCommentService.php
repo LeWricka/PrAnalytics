@@ -29,13 +29,15 @@ class AddPRCommentService
      */
     public function execute(string $commentData, array $requestFormattedData)
     {
-        if (!isset($requestFormattedData['comment']['body']) || !isset($requestFormattedData['repository']['full_name'])) {
-            throw new HttpException(Response::HTTP_BAD_REQUEST, 'Invalid given data');
-        }
-        $prCommentType = PRCommentType::buildFromData($requestFormattedData['comment']['body']);
-        $originRepository = strtolower(str_replace('/', '-', $requestFormattedData['repository']['full_name']));
-        $prComment = new PRComment($prCommentType, $commentData);
+        if ($requestFormattedData['action'] == 'created') {
+            if (!isset($requestFormattedData['comment']['body']) || !isset($requestFormattedData['repository']['full_name'])) {
+                throw new HttpException(Response::HTTP_BAD_REQUEST, 'Invalid given data');
+            }
+            $prCommentType = PRCommentType::buildFromData($requestFormattedData['comment']['body']);
+            $originRepository = strtolower(str_replace('/', '-', $requestFormattedData['repository']['full_name']));
+            $prComment = new PRComment($prCommentType, $commentData);
 
-        $this->prCommentRepository->save($prComment, $originRepository);
+            $this->prCommentRepository->save($prComment, $originRepository);
+        }
     }
 }
