@@ -156,4 +156,4 @@ services:
 
 volumes:
   esdata1:
-  logs:
+  logs:á
