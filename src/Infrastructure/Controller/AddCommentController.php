@@ -21,7 +21,7 @@ class AddCommentController
         $request = Request::createFromGlobals();
         $addPRCommentService->execute($request->getContent(), $this->transformAction($request));
 
-        return new Response($request->getContent());
+        return new Response();
     }
 
     /**
