@@ -1,159 +1,164 @@
 version: '3.4'
 
 services:
-    symfony:
-      image: symfony:latest
-      build:
-        context: .
-        args:
-          - "BUILD_ARGUMENT_ENV=dev"
-          - "BUILD_ARGUMENT_DEBUG_ENABLED=false"
-        dockerfile: ./Dockerfile
-      container_name: symfony
-      expose:
-        - "80"
-        - "443"
-      ports:
-        - "80:80"
-        - "443:443"
-      volumes:
-        - .:/var/www/html
-      depends_on:
-        - mysql
-        - rabbitmq
-      links:
-        - mysql
-        - rabbitmq
+  symfony:
+    image: symfony:latest
+    build:
+      context: .
+      args:
+        - "BUILD_ARGUMENT_ENV=dev"
+        - "BUILD_ARGUMENT_DEBUG_ENABLED=false"
+      dockerfile: ./Dockerfile
+    container_name: symfony
+    expose:
+      - "80"
+      - "443"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - mysql
+      - rabbitmq
+    links:
+      - mysql
+      - rabbitmq
 
-    supervisord:
-      image: symfony:latest
-      build:
-        context: .
-        args:
-          - "BUILD_ARGUMENT_ENV=dev"
-          - "BUILD_ARGUMENT_DEBUG_ENABLED=false"
-        dockerfile: ./Dockerfile
-      container_name: supervisord
-      user: root
-      volumes:
-        - .:/var/www/html
-      depends_on:
-        - mysql
-        - rabbitmq
-      links:
-        - mysql
-        - rabbitmq
-      command: ["/usr/bin/supervisord"]
+  supervisord:
+    image: symfony:latest
+    build:
+      context: .
+      args:
+        - "BUILD_ARGUMENT_ENV=dev"
+        - "BUILD_ARGUMENT_DEBUG_ENABLED=false"
+      dockerfile: ./Dockerfile
+    container_name: supervisord
+    user: root
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - mysql
+      - rabbitmq
+    links:
+      - mysql
+      - rabbitmq
+    command: ["/usr/bin/supervisord"]
 
-    mysql:
-      image: mysql:8.0
-      container_name: mysql
-      command: --default-authentication-plugin=mysql_native_password
-      environment:
-        - MYSQL_ROOT_PASSWORD=secret
-        - MYSQL_DATABASE=symfony
-      ports:
-        - "33061:3306"
-      volumes:
-        - ./var/mysql-data:/var/lib/mysql
-        - ./docker/dev/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_ROOT_PASSWORD=secret
+      - MYSQL_DATABASE=symfony
+    ports:
+      - "33061:3306"
+    volumes:
+      - ./var/mysql-data:/var/lib/mysql
+      - ./docker/dev/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
 
-    rabbitmq:
-      image: rabbitmq:3-management-alpine
-      container_name: rabbitmq
-      environment:
-        - RABBITMQ_DEFAULT_USER=guest
-        - RABBITMQ_DEFAULT_PASS=guest
-      ports:
-        - "15672:15672"
-      volumes:
-        - ./var/rabbitmq:/var/lib/rabbitmq
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "15672:15672"
+    volumes:
+      - ./var/rabbitmq:/var/lib/rabbitmq
 
-    elasticsearch:
-      image: docker.elastic.co/elasticsearch/elasticsearch:7.5.1
-      container_name: elasticsearch
-      environment:
-        - node.name=elasticsearch
-        - cluster.name=elasticsearch-cluste
-        - cluster.initial_master_nodes=elasticsearch-node
-        - bootstrap.memory_lock=true
-        - "ES_JAVA_OPTS=-Xms256M -Xmx256M"
-        - http.cors.enabled=true
-        - http.cors.allow-origin=*
-        - network.host=_eth0_
-      ulimits:
-        nproc: 65535
-        memlock:
-          soft: -1
-          hard: -1
-      cap_add:
-        - ALL
-      # privileged: true
-      deploy:
-        replicas: 1
-        update_config:
-          parallelism: 1
-          delay: 10s
-        resources:
-          limits:
-            cpus: '1'
-            memory: 256M
-          reservations:
-            cpus: '1'
-            memory: 1G
-        restart_policy:
-          condition: on-failure
-          delay: 5s
-          max_attempts: 3
-          window: 10s
-      volumes:
-        - type: volume
-          source: logs
-          target: /var/log
-        - type: volume
-          source: esdata1
-          target: /usr/share/elasticsearch/data
-      ports:
-        - 9200:9200
-        - 9300:9300
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.1
+    container_name: elasticsearch
+    environment:
+      - node.name=elasticsearch
+      - cluster.name=elasticsearch-cluster
+      - cluster.initial_master_nodes=elasticsearch
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - Des.enforce.bootstrap.checks=true
+      - http.cors.enabled=true
+      - http.cors.allow-origin=*
+      - network.host=_eth0_
+      - xpack.security.transport.ssl.enabled=true
+    ulimits:
+      nproc: 262144
+      nofile:
+        soft: 65536
+        hard: 65536
+      memlock:
+        soft: -1
+        hard: -1
+    cap_add:
+      - ALL
+    # privileged: true
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+      resources:
+        limits:
+          cpus: '1'
+          memory: 256M
+        reservations:
+          cpus: '1'
+          memory: 1G
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 10s
+    volumes:
+      - type: volume
+        source: logs
+        target: /var/log
+      - type: volume
+        source: esdata1
+        target: /usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+      - 9300:9300
 
-    kibana:
-      image: docker.elastic.co/kibana/kibana:7.5.1
-      container_name: kibana
-      environment:
-        SERVER_NAME: localhost
-        ELASTICSEARCH_URL: http://localhost:9200/
-      ports:
-        - 5601:5601
-      volumes:
-        - type: volume
-          source: logs
-          target: /var/log
-      ulimits:
-        nproc: 65535
-        memlock:
-          soft: -1
-          hard: -1
-      cap_add:
-        - ALL
-      deploy:
-        replicas: 1
-        update_config:
-          parallelism: 1
-          delay: 10s
-        resources:
-          limits:
-            cpus: '1'
-            memory: 256M
-          reservations:
-            cpus: '1'
-            memory: 256M
-        restart_policy:
-          condition: on-failure
-          delay: 30s
-          max_attempts: 3
-          window: 120s
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.5.1
+    container_name: kibana
+    environment:
+      SERVER_NAME: localhost
+      ELASTICSEARCH_URL: http://localhost:9200
+    ports:
+      - 5601:5601
+    volumes:
+      - type: volume
+        source: logs
+        target: /var/log
+    ulimits:
+      nproc: 65535
+      memlock:
+        soft: -1
+        hard: -1
+    cap_add:
+      - ALL
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+      resources:
+        limits:
+          cpus: '1'
+          memory: 256M
+        reservations:
+          cpus: '1'
+          memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+        max_attempts: 3
+        window: 120s
 
 volumes:
   esdata1:
-  logs:á
+  logs:
