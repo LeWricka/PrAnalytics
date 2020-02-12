@@ -36,10 +36,23 @@ class AddPRCommentServiceTest extends TestCase
     /**
      * @test
      */
-    public function does_not_do_anythin_if_not_a_creation_action()
+    public function does_not_do_anything_if_not_a_creation_action()
     {
         $commentData = 'commentData';
         $requestFormattedData = ['action' => 'edited', 'comment' => ['body' => '[testing]...']];
+        $this->prCommentRepository->save(Argument::any(),Argument::any())->shouldNotBeCalled();
+
+        $this->addPRCommentService->execute($commentData, $requestFormattedData);
+    }
+
+    /**
+     * @test
+     * @expectedException Symfony\Component\HttpKernel\Exception\HttpException
+     */
+    public function does_not_do_anything_if_it_is_response_comment()
+    {
+        $commentData = 'commentData';
+        $requestFormattedData = ['action' => 'created', 'comment' => ['in_reply_to_id' => 123]];
         $this->prCommentRepository->save(Argument::any(),Argument::any())->shouldNotBeCalled();
 
         $this->addPRCommentService->execute($commentData, $requestFormattedData);

@@ -33,6 +33,9 @@ class AddPRCommentService
             if (!isset($requestFormattedData['comment']['body']) || !isset($requestFormattedData['repository']['full_name'])) {
                 throw new HttpException(Response::HTTP_BAD_REQUEST, 'Invalid given data');
             }
+            if (isset($requestFormattedData['comment']['in_reply_to_id'])) {
+                throw new HttpException(Response::HTTP_BAD_REQUEST, 'Reply comment');
+            }
             $prCommentType = PRCommentType::buildFromData($requestFormattedData['comment']['body']);
             $originRepository = strtolower(str_replace('/', '-', $requestFormattedData['repository']['full_name']));
             $prComment = new PRComment($prCommentType, $commentData);
