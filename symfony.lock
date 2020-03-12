@@ -5,6 +5,9 @@
     "behat/gherkin": {
         "version": "v4.4.5"
     },
+    "borsaco/telegram-bot-api-bundle": {
+        "version": "1.0.3"
+    },
     "codeception/codeception": {
         "version": "2.3",
         "recipe": {
@@ -189,6 +192,15 @@
     "hassankhan/config": {
         "version": "0.11.2"
     },
+    "illuminate/contracts": {
+        "version": "v5.8.36"
+    },
+    "illuminate/support": {
+        "version": "v5.8.36"
+    },
+    "irazasyed/telegram-bot-sdk": {
+        "version": "v3.0.0"
+    },
     "jdorn/sql-formatter": {
         "version": "v1.2.17"
     },
@@ -205,6 +217,9 @@
             "config/routes/scheduler.yaml"
         ]
     },
+    "league/event": {
+        "version": "2.2.0"
+    },
     "monolog/monolog": {
         "version": "1.24.0"
     },
@@ -213,6 +228,9 @@
     },
     "myclabs/deep-copy": {
         "version": "1.9.5"
+    },
+    "nesbot/carbon": {
+        "version": "2.31.0"
     },
     "nikic/php-parser": {
         "version": "v4.2.2"
@@ -294,6 +312,9 @@
     },
     "psr/log": {
         "version": "1.1.0"
+    },
+    "psr/simple-cache": {
+        "version": "1.0.1"
     },
     "ralouphie/getallheaders": {
         "version": "3.0.3"
@@ -757,6 +778,9 @@
     },
     "webmozart/assert": {
         "version": "1.4.0"
+    },
+    "webscraperio/api-client-php": {
+        "version": "v0.2.1"
     },
     "zendframework/zend-code": {
         "version": "3.3.1"

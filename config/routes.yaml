@@ -4,3 +4,6 @@
 add_comment:
     path: add-comment
     controller: App\Infrastructure\Controller\AddCommentController
+corona:
+    path: corona
+    controller: App\Infrastructure\Controller\Corona\CoronaController

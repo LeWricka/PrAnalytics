@@ -17,4 +17,5 @@ return [
     JMose\CommandSchedulerBundle\JMoseCommandSchedulerBundle::class => ['all' => true],
     Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle::class => ['all' => true],
     FOS\ElasticaBundle\FOSElasticaBundle::class => ['all' => true],
+    Borsaco\TelegramBotApiBundle\TelegramBotApiBundle::class => ['all' => true],
 ];
